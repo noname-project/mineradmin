@@ -73,7 +73,7 @@ const ProjectUsersTemplate = `<!DOCTYPE html>
 	</style>
 </head>
 <body>
-	<h1>Projects :: {{.Project.Name}}</h1>
+	<h1>Project :: {{.Project.Name}}</h1>
 	{{range .Balances}}
 		<div>
 			<span>{{.Address}}</sp>
