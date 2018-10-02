@@ -22,6 +22,14 @@ import (
 const connStrEnv = "MINERADMIN_POSTGRES_CONNECTION_STRING"
 
 func main() {
+	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		RedirectCode: http.StatusMovedPermanently,
+	}))
+
 	connStr, exists := os.LookupEnv(connStrEnv)
 	if !exists {
 		e.Logger.Fatalf("%s environment variable haven't set", connStrEnv)
@@ -37,14 +45,6 @@ func main() {
 	bs := store.NewDBBalancesStore(db)
 
 	h := handler.NewHandler(ps, bs)
-
-	e := echo.New()
-
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
-		RedirectCode: http.StatusMovedPermanently,
-	}))
 
 	t, err := template.New("projects").Parse(handler.ProjectsTemplate)
 	if err != nil {
