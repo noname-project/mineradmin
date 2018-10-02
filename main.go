@@ -17,7 +17,7 @@ import (
 // `"postgres://pqgotest:password@localhost/pqgotest?sslmode=verify-full"`
 // or
 // `user=pqgotest password=password dbname=pqgotest sslmode=verify-full`
-const connStrEnv = "MINERSERVER_POSTGRES_CONNECTION_STRING"
+const connStrEnv = "MINERADMIN_POSTGRES_CONNECTION_STRING"
 
 func main() {
 	e := echo.New()
