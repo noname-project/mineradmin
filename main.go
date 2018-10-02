@@ -2,8 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -41,34 +39,16 @@ func main() {
 	}
 	defer db.Close()
 
+	handler.RegisterRenderer(e)
+
 	ps := store.NewDBProjectsStore(db)
 	bs := store.NewDBBalancesStore(db)
 
 	h := handler.NewHandler(ps, bs)
-
-	t, err := template.New("projects").Parse(handler.ProjectsTemplate)
-	if err != nil {
-		e.Logger.Fatal(err)
-	}
-
-	t, err = t.New("project-users").Parse(handler.ProjectUsersTemplate)
-	if err != nil {
-		e.Logger.Fatal(err)
-	}
-
-	e.Renderer = &Template{templates: t}
 
 	e.GET("/", h.Index)
 	e.GET("/projects", h.Projects)
 	e.GET("/project/:project-id/users", h.ProjectUsers)
 
 	e.Logger.Fatal(e.Start(":80"))
-}
-
-type Template struct {
-	templates *template.Template
-}
-
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
 }

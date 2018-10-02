@@ -24,7 +24,7 @@ func (h Handler) Index(c echo.Context) error {
 }
 
 // language=HTML
-const ProjectsTemplate = `<!DOCTYPE html>
+const projectsTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -60,7 +60,7 @@ func (h Handler) Projects(c echo.Context) error {
 }
 
 // language=HTML
-const ProjectUsersTemplate = `<!DOCTYPE html>
+const projectUsersTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -87,13 +87,15 @@ const ProjectUsersTemplate = `<!DOCTYPE html>
 `
 
 func (h Handler) ProjectUsers(c echo.Context) error {
-	project, err := h.projects.Get(c.Param("project-id"))
+	projectID := c.Param("project-id")
+
+	project, err := h.projects.Get(projectID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError,
 			"Internal server error")
 	}
 
-	balances, err := h.balances.ProjectUsersBalances(project.ID)
+	balances, err := h.balances.ProjectUsersBalances(projectID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError,
 			"Internal server error")
