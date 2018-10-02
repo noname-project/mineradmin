@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -61,13 +62,18 @@ func (bs dbBalancesStore) ProjectsBalances() ([]ProjectBalance, error) {
 			return balances, err
 		}
 
+		amountDec, err := decimal.NewFromString(amount)
+		if err != nil {
+			return balances, err
+		}
+
 		if len(balances) == 0 || balances[len(balances)-1].
 			ProjectID != projectID {
 			balances = append(balances, ProjectBalance{
 				ProjectID:   projectID,
 				ProjectName: projectName,
 				Coins: []CoinAmount{
-					{Coin: coin, Amount: amount},
+					{Coin: coin, Amount: amountDec.String()},
 				},
 			})
 		} else {
@@ -105,12 +111,17 @@ func (bs dbBalancesStore) ProjectUsersBalances(projectID string) (
 			return balances, err
 		}
 
+		amountDec, err := decimal.NewFromString(amount)
+		if err != nil {
+			return balances, err
+		}
+
 		if len(balances) == 0 || balances[len(balances)-1].
 			Address != address {
 			balances = append(balances, UserBalance{
 				Address: address,
 				Coins: []CoinAmount{
-					{Coin: coin, Amount: amount},
+					{Coin: coin, Amount: amountDec.String()},
 				},
 			})
 		} else {
@@ -139,8 +150,9 @@ func (bs *MockBalancesStore) ProjectsBalances() ([]ProjectBalance, error) {
 	return projects.([]ProjectBalance), args.Error(1)
 }
 
-func (bs *MockBalancesStore) ProjectUsersBalances() ([]UserBalance, error) {
-	args := bs.Called()
+func (bs *MockBalancesStore) ProjectUsersBalances(projectID string) (
+	[]UserBalance, error) {
+	args := bs.Called(projectID)
 	projects := args.Get(0)
 	if projects == nil {
 		return nil, args.Error(1)

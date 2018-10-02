@@ -19,8 +19,8 @@ func Test_dbBalancesStore_ProjectsBalances_success(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"projectid", "p.name", "coin", "SUM(amount)"}).
 		AddRow("id-1", "name-1", "BTC", "1").
 		AddRow("id-1", "name-1", "LTC", "2").
-		AddRow("id-2", "name-2", "BTC", "3").
-		AddRow("id-2", "name-2", "LTC", "4")
+		AddRow("id-2", "name-2", "BTC", "3.100").
+		AddRow("id-2", "name-2", "LTC", "40")
 
 	wantBalances := []ProjectBalance{
 		{
@@ -35,8 +35,8 @@ func Test_dbBalancesStore_ProjectsBalances_success(t *testing.T) {
 			ProjectID:   "id-2",
 			ProjectName: "name-2",
 			Coins: []CoinAmount{
-				{Coin: "BTC", Amount: "3"},
-				{Coin: "LTC", Amount: "4"},
+				{Coin: "BTC", Amount: "3.1"},
+				{Coin: "LTC", Amount: "40"},
 			},
 		},
 	}
@@ -87,8 +87,8 @@ func Test_dbBalancesStore_ProjectUsersBalances_success(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"address", "coin", "SUM(amount)"}).
 		AddRow("addr-1", "BTC", "1").
 		AddRow("addr-1", "LTC", "2").
-		AddRow("addr-2", "BTC", "3").
-		AddRow("addr-2", "LTC", "4")
+		AddRow("addr-2", "BTC", "3.100").
+		AddRow("addr-2", "LTC", "40")
 
 	wantBalances := []UserBalance{
 		{
@@ -101,8 +101,8 @@ func Test_dbBalancesStore_ProjectUsersBalances_success(t *testing.T) {
 		{
 			Address: "addr-2",
 			Coins: []CoinAmount{
-				{Coin: "BTC", Amount: "3"},
-				{Coin: "LTC", Amount: "4"},
+				{Coin: "BTC", Amount: "3.1"},
+				{Coin: "LTC", Amount: "40"},
 			},
 		},
 	}

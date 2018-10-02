@@ -85,6 +85,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:81e02c4edb639c80559c0650f9401d3e2dcc3256d1fa215382bb7c83c1db9126"
+  name = "github.com/shopspring/decimal"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cd690d0c9e2447b1ef2a129a6b7b49077da89b8e"
+  version = "1.1.0"
+
+[[projects]]
   digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
   name = "github.com/stretchr/objx"
   packages = ["."]
@@ -146,6 +154,7 @@
     "github.com/labstack/echo",
     "github.com/labstack/echo/middleware",
     "github.com/lib/pq",
+    "github.com/shopspring/decimal",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
   ]
