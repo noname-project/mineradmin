@@ -5,11 +5,13 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net/http"
 	"os"
 
 	"bitbucket.org/boomstarternetwork/mineradmin/handler"
 	"bitbucket.org/boomstarternetwork/mineradmin/store"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	_ "github.com/lib/pq"
 )
 
@@ -20,8 +22,6 @@ import (
 const connStrEnv = "MINERADMIN_POSTGRES_CONNECTION_STRING"
 
 func main() {
-	e := echo.New()
-
 	connStr, exists := os.LookupEnv(connStrEnv)
 	if !exists {
 		e.Logger.Fatalf("%s environment variable haven't set", connStrEnv)
@@ -37,6 +37,14 @@ func main() {
 	bs := store.NewDBBalancesStore(db)
 
 	h := handler.NewHandler(ps, bs)
+
+	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		RedirectCode: http.StatusMovedPermanently,
+	}))
 
 	t, err := template.New("projects").Parse(handler.ProjectsTemplate)
 	if err != nil {
