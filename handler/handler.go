@@ -40,7 +40,7 @@ const ProjectsTemplate = `<!DOCTYPE html>
 	<h1>Projects</h1>
 	{{range .}}
 		<div>
-			<a href="/project/{{.ProjectID}}/users-balances">{{.ProjectName}}</a>
+			<a href="/project/{{.ProjectID}}/users">{{.ProjectName}}</a>
 			{{range .Coins}}
 				<span class="coin">{{.Coin}}:{{.Amount}}</span>
 			{{end}}
@@ -99,7 +99,7 @@ func (h Handler) ProjectUsers(c echo.Context) error {
 			"Internal server error")
 	}
 
-	return c.Render(http.StatusOK, "project-user-balances", struct {
+	return c.Render(http.StatusOK, "project-users", struct {
 		Project  store.Project
 		Balances []store.UserBalance
 	}{project, balances})
