@@ -39,6 +39,6 @@ func NewMockProjectsStore() *MockProjectsStore {
 }
 
 func (ps *MockProjectsStore) Get(projectID string) (Project, error) {
-	args := ps.Called()
+	args := ps.Called(projectID)
 	return args.Get(0).(Project), args.Error(1)
 }
