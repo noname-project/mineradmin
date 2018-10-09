@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/boomstarternetwork/mineradmin/handler"
-	"bitbucket.org/boomstarternetwork/mineradmin/store"
+	"github.com/boomstarternetwork/mineradmin/handler"
+	"github.com/boomstarternetwork/mineradmin/store"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	_ "github.com/lib/pq"

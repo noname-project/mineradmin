@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"bitbucket.org/boomstarternetwork/mineradmin/store"
+	"github.com/boomstarternetwork/mineradmin/store"
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
 )
