@@ -1,0 +1,63 @@
+{{define "title"}}mineradmin / Projects / {{.Project.Name}} / Users{{end}}
+
+{{define "style"}}
+<style>
+    .coin {
+        display: inline-block;
+        padding-left: 0.5em;
+    }
+    .coin:first-child {
+        padding-left: 0;
+    }
+    .no-coins {
+        font-style: italic;
+        color: grey;
+    }
+    table, tr, td, th {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+    }
+    td, th {
+        padding-left: 1em;
+    }
+    td:first-child, th:first-child {
+        padding-left: 0;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+
+<h1>
+    <a href="/">mineradmin</a> /
+    <a href="/projects">Projects</a> /
+    {{.Project.Name}} /
+    Users
+</h1>
+
+{{if .Balances}}
+    <table>
+        <tr>
+            <th>Miner address</th>
+            <th>Mined coins</th>
+        </tr>
+    {{range .Balances}}
+        <tr>
+            <td>{{.Email}}</td>
+            <td>
+            {{range .Coins}}
+                <span class="coin">{{.Coin}}:{{.Amount}}</span>
+            {{end}}
+            </td>
+        </tr>
+    {{end}}
+    </table>
+{{end}}
+
+{{if not .Balances}}
+    <span class="no-coins">No coins mined</span>
+{{end}}
+
+{{end}}

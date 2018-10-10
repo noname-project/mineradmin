@@ -1,0 +1,61 @@
+{{define "title"}}mineradmin / Users{{end}}
+
+{{define "style"}}
+<style>
+    .new-user {
+        padding-bottom: 1em;
+    }
+    .new-user legend {
+        font-weight: bold;
+        padding-bottom: 0.2em;
+    }
+    table, tr, td {
+        border: 0;
+        padding: 0;
+        margin: 0 0 0 -0.1em;
+        text-align: left;
+    }
+    td, th {
+        padding-right: 1em;
+    }
+    td:last-child, th:last-child {
+        padding-right: 0;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+
+<h1>
+    <a href="/">mineradmin</a> /
+    Users
+</h1>
+
+<form class="new-user" method="POST" action="/users">
+    <legend>New user</legend>
+    <label for="email">Email:</label>
+    <input id="email" type="email" name="email" placeholder="Type user email"
+           required/>
+    <label for="name">Name:</label>
+    <input id="name" type="text" name="name" placeholder="Type user name"
+           required pattern=".*\S.*"/>
+    <input type="hidden" name="csrf-token" value="{{.CSRFToken}}"/>
+    <button type="submit">Create</button>
+</form>
+
+{{if .Users}}
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Name</th>
+        </tr>
+        {{range .Users}}
+            <tr>
+                <td><a href="/users/{{.ID}}/addresses">{{.Email}}</a></td>
+                <td>{{.Name}}</td>
+            </tr>
+        {{end}}
+    </table>
+{{end}}
+
+{{end}}

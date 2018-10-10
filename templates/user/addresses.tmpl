@@ -1,0 +1,103 @@
+{{define "title"}}mineradmin / Users / {{.User.Email}} / Addresses{{end}}
+
+{{define "style"}}
+<style>
+    .new-address {
+        padding-bottom: 1em;
+    }
+    .new-address legend {
+        font-weight: bold;
+        padding-bottom: 0.2em;
+    }
+    .no-address {
+        font-style: italic;
+        color: grey;
+        padding-bottom: 0.2em;
+    }
+    .remove {
+        display: inline-block;
+        margin-right: 0.3em;
+    }
+    .remove button {
+        padding: 0;
+        margin: 0;
+        width: 1.7em;
+    }
+    table, tr, td {
+        border: 0;
+        padding: 0;
+        margin: 0 0 0 -0.1em;
+        text-align: left;
+    }
+    td, th {
+        padding-right: 1em;
+    }
+    td:first-child, th:first-child,
+    td:last-child, th:last-child {
+        padding-right: 0;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+
+<h1>
+    <a href="/">mineradmin</a> /
+    <a href="/users">Users</a> /
+    {{.User.Email}} /
+    Addresses
+</h1>
+
+<form class="new-address" method="POST"
+      action="/users/{{.User.ID}}/addresses">
+    <legend>Add address</legend>
+    <label for="coin">Coin:</label>
+    <select id="coin" name="coin">
+    {{range .Coins}}
+        <option value="{{.}}">{{.}}</option>
+    {{end}}
+    </select>
+    <label for="address">Address:</label>
+    <input id="address" type="text" name="address" placeholder="Type address"
+           required pattern=".*\S.*"/>
+    <input type="hidden" name="action" value="add"/>
+    <input type="hidden" name="csrf-token" value="{{.CSRFToken}}"/>
+    <button type="submit">Add</button>
+</form>
+
+{{range $coin := .Coins}}
+    {{$addrs := index $.Addresses $coin}}
+    {{if $addrs}}
+        <table>
+            <tr>
+                <th colspan="2">{{$coin}} addresses</th>
+            </tr>
+            {{range $addrs}}
+                <tr>
+                    <td>
+                        <form class="remove" method="POST"
+                              action="/users/{{$.User.ID}}/addresses">
+                            <button data-address="{{$coin}}"
+                                    title="Remove"
+                                    type="submit">❌</button>
+                            <input type="hidden" name="coin" value="{{$coin}}"/>
+                            <input type="hidden" name="address" value="{{.}}"/>
+                            <input type="hidden" name="action" value="remove"/>
+                            <input type="hidden" name="csrf-token"
+                                   value="{{$.CSRFToken}}"/>
+                        </form>
+                    </td>
+                    <td>
+                    {{.}}
+                    </td>
+                </tr>
+            {{end}}
+        </table>
+    {{end}}
+
+    {{if not $addrs}}
+        <div class="no-address">No {{$coin}} address</div>
+    {{end}}
+{{end}}
+
+{{end}}

@@ -1,0 +1,32 @@
+{{define "title"}}mineradmin / Projects / {{.Project.Name}}{{end}}
+
+{{define "style"}}
+<style>
+    legend {
+        font-weight: bold;
+        padding-bottom: 0.2em;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+
+<h1>
+    <a href="/">mineradmin</a> /
+    <a href="/projects">Projects</a> /
+    {{.Project.Name}} /
+    Edit
+</h1>
+
+<form method="POST" action="/projects/{{.Project.ID}}">
+    <legend>Edit project</legend>
+    <input type="hidden" name="action" value="edit"/>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" value="{{.Project.Name}}"
+           placeholder="Type project name"
+           required pattern="[\w -]*\S[\w -]*"/>
+    <input type="hidden" name="csrf-token" value="{{.CSRFToken}}"/>
+    <button type="submit">Save</button>
+</form>
+
+{{end}}

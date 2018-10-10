@@ -1,0 +1,108 @@
+{{define "title"}}mineradmin / Admins{{end}}
+
+{{define "style"}}
+<style>
+    .new-admin {
+        padding-bottom: 1em;
+    }
+    .new-admin legend {
+        font-weight: bold;
+        padding-bottom: 0.2em;
+    }
+    .remove {
+        display: inline-block;
+    }
+    .reset-password {
+        display: inline-block;
+        margin-right: 0.3em;
+    }
+    .remove button, .reset-password button {
+        padding: 0;
+        margin: 0;
+        width: 1.7em;
+    }
+    table, tr, td {
+        border: 0;
+        padding: 0;
+        margin: 0 0 0 -0.1em;
+        text-align: left;
+    }
+    td, th {
+        padding-right: 1em;
+    }
+    td:first-child, th:first-child,
+    td:last-child, th:last-child {
+        padding-right: 0;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+
+<h1>
+    <a href="/">mineradmin</a> /
+    Admins
+</h1>
+
+<form class="new-admin" method="POST" action="/admins">
+    <legend>New admin</legend>
+    <label for="login">Login:</label>
+    <input type="text" id="login" name="login" placeholder="Type admin login"
+           required pattern="[\w._-]*\w[\w._-]*"/>
+    <input type="hidden" name="csrf-token" value="{{.CSRFToken}}"/>
+    <button type="submit">Create</button>
+</form>
+
+{{if .Admins}}
+    <table>
+        <tr>
+            <th colspan="2">Admins</th>
+        </tr>
+    {{range .Admins}}
+        <tr>
+            <td>
+                <form class="remove" method="POST"
+                      action="/admins/{{.ID}}">
+                    <button data-project="{{.Login}}"
+                            title="Remove"
+                            type="submit">❌</button>
+                    <input type="hidden" name="action" value="remove"/>
+                    <input type="hidden" name="csrf-token"
+                           value="{{$.CSRFToken}}"/>
+                </form>
+                <form class="reset-password" method="POST"
+                      action="/admins/{{.ID}}">
+                    <button type="submit"
+                            title="Reset password">↺</button>
+                    <input type="hidden" name="action" value="reset-password"/>
+                    <input type="hidden" name="csrf-token"
+                           value="{{$.CSRFToken}}"/>
+                </form>
+            </td>
+            <td>
+                {{.Login}}
+            </td>
+        </tr>
+    {{end}}
+    </table>
+{{end}}
+
+{{end}}
+
+{{define "js"}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var removeForms = document.getElementsByClassName("remove");
+        for (var i = 0; i < removeForms.length; i++) {
+            let removeButton = removeForms[i].children[0];
+            let project = removeButton.dataset.admin;
+            removeButton.onclick = function(event) {
+                if (!confirm('Are you sure you want to remove admin ' +
+                        '"'+admin+'"')) {
+                    event.preventDefault();
+                }
+            }
+        }
+    }, false);
+</script>
+{{end}}

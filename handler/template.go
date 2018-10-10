@@ -1,30 +1,112 @@
 package handler
 
 import (
+	"errors"
 	"html/template"
 	"io"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/labstack/echo"
 )
 
-type Template struct {
-	templates *template.Template
+type ProdTemplateRenderer struct {
+	templates map[string]*template.Template
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+func NewProdTemplateRenderer(templatesPath string) (ProdTemplateRenderer,
+	error) {
+	ts := map[string]*template.Template{}
+
+	if strings.Index(templatesPath, "./") == 0 {
+		templatesPath = templatesPath[2:]
+	}
+
+	if templatesPath[len(templatesPath)-1] != '/' {
+		templatesPath += "/"
+	}
+
+	baseTmpl, err := template.ParseFiles(filepath.Join(
+		templatesPath, "layout/base.tmpl"))
+	if err != nil {
+		return ProdTemplateRenderer{}, err
+	}
+
+	tmplFileExtRe := regexp.MustCompile(`\.tmpl$`)
+
+	err = filepath.Walk(templatesPath, func(path string, info os.FileInfo,
+		err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if !tmplFileExtRe.MatchString(info.Name()) {
+			return nil
+		}
+
+		name := strings.TrimPrefix(path, templatesPath)
+		name = strings.TrimSuffix(name, ".tmpl")
+
+		tmpl, err := baseTmpl.Clone()
+		if err != nil {
+			return err
+		}
+
+		tmpl, err = tmpl.ParseFiles(path)
+		if err != nil {
+			return err
+		}
+
+		ts[name] = tmpl
+
+		return nil
+	})
+	if err != nil {
+		return ProdTemplateRenderer{}, err
+	}
+
+	return ProdTemplateRenderer{
+		templates: ts,
+	}, nil
 }
 
-func RegisterRenderer(e *echo.Echo) {
-	t, err := template.New("projects").Parse(projectsTemplate)
-	if err != nil {
-		e.Logger.Fatal(err)
+func (t ProdTemplateRenderer) Render(w io.Writer, name string,
+	data interface{}, _ echo.Context) error {
+	tmpl, exists := t.templates[name]
+	if !exists {
+		return errors.New("template not found")
 	}
+	return tmpl.Execute(w, data)
+}
 
-	t, err = t.New("project-users").Parse(projectUsersTemplate)
-	if err != nil {
-		e.Logger.Fatal(err)
+type DevTemplateRenderer struct {
+	templatesPath string
+}
+
+func NewDevTemplateRenderer(templatesPath string) DevTemplateRenderer {
+	return DevTemplateRenderer{
+		templatesPath: templatesPath,
 	}
+}
 
-	e.Renderer = &Template{templates: t}
+func (r DevTemplateRenderer) Render(w io.Writer, name string, data interface{},
+	_ echo.Context) error {
+	tmpl, err := template.ParseFiles(
+		filepath.Join(r.templatesPath, "layout/base.tmpl"),
+		filepath.Join(r.templatesPath, name+".tmpl"))
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(w, data)
+}
+
+type testRenderer struct{}
+
+func (testRenderer) Render(_ io.Writer, _ string, _ interface{},
+	_ echo.Context) error {
+	return nil
 }

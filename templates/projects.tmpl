@@ -1,0 +1,121 @@
+{{define "title"}}mineradmin / Projects{{end}}
+
+{{define "style"}}
+<style>
+    .new-project {
+        padding-bottom: 1em;
+    }
+    .new-project legend {
+        font-weight: bold;
+        padding-bottom: 0.2em;
+    }
+    .remove {
+        display: inline-block;
+    }
+    .edit {
+        margin-right: 0.3em;
+    }
+    .remove button, .edit button {
+        padding: 0;
+        margin: 0;
+        width: 1.7em;
+    }
+    .coin {
+        display: inline-block;
+        padding-left: 0.5em;
+    }
+    .coin:first-child {
+        padding-left: 0;
+    }
+    .no-coins {
+        font-style: italic;
+        color: grey;
+    }
+    table, tr, td {
+        border: 0;
+        padding: 0;
+        margin: 0 0 0 -0.1em;
+        text-align: left;
+    }
+    td, th {
+        padding-right: 1em;
+    }
+    td:first-child, th:first-child,
+    td:last-child, th:last-child {
+        padding-right: 0;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+
+<h1>
+    <a href="/">mineradmin</a> /
+    Projects
+</h1>
+
+<form class="new-project" method="POST" action="/projects">
+    <legend>New project</legend>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" placeholder="Type project name"
+           required pattern="[\w -]*\S[\w -]*"/>
+    <input type="hidden" name="csrf-token" value="{{.CSRFToken}}"/>
+    <button type="submit">Create</button>
+</form>
+
+{{if .Balances}}
+    <table>
+        <tr>
+            <th colspan="2">Project</th>
+            <th>Mined coins</th>
+        </tr>
+        {{range .Balances}}
+            <tr>
+                <td>
+                    <form class="remove" method="POST"
+                          action="/projects/{{.ProjectID}}">
+                        <button data-project="{{.ProjectName}}"
+                                title="Remove"
+                                type="submit">❌</button>
+                        <input type="hidden" name="action" value="remove"/>
+                        <input type="hidden" name="csrf-token"
+                               value="{{$.CSRFToken}}"/>
+                    </form>
+                    <a class="edit" href="/projects/{{.ProjectID}}/edit">
+                        <button title="Edit">✎</button></a>
+                </td>
+                <td>
+                    <a href="/projects/{{.ProjectID}}/users">{{.ProjectName}}</a>
+                </td>
+                <td>
+                    {{range .Coins}}
+                        <span class="coin">{{.Coin}}:{{.Amount}}</span>
+                    {{end}}
+                    {{if not .Coins}}
+                        <span class="no-coins">no coins mined</span>
+                    {{end}}
+                </td>
+            </tr>
+        {{end}}
+    </table>
+{{end}}
+
+{{end}}
+
+{{define "js"}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var removeForms = document.getElementsByClassName("remove");
+        for (var i = 0; i < removeForms.length; i++) {
+            let removeButton = removeForms[i].children[0];
+            let project = removeButton.dataset.project;
+            removeButton.onclick = function(event) {
+                if (!confirm('Are you sure you want to remove project ' +
+                        '"'+project+'"')) {
+                    event.preventDefault();
+                }
+            }
+        }
+    }, false);
+</script>
+{{end}}
