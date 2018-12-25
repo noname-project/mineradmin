@@ -103,10 +103,3 @@ func (r DevTemplateRenderer) Render(w io.Writer, name string, data interface{},
 	}
 	return tmpl.Execute(w, data)
 }
-
-type testRenderer struct{}
-
-func (testRenderer) Render(_ io.Writer, _ string, _ interface{},
-	_ echo.Context) error {
-	return nil
-}

@@ -2,18 +2,19 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
-	"github.com/boomstarternetwork/mineradmin/store"
-	"github.com/gosimple/slug"
+	"github.com/boomstarternetwork/bestore"
 	"github.com/labstack/echo"
 )
 
 type projectsPageData struct {
 	CSRFToken string
-	Balances  []store.ProjectBalance
+	Balances  []bestore.ProjectBalance
 }
 
 func (h Handler) Projects(c echo.Context) error {
@@ -31,18 +32,25 @@ func (h Handler) Projects(c echo.Context) error {
 
 type projectEditPageData struct {
 	CSRFToken string
-	Project   store.Project
+	Project   bestore.Project
 }
 
 func (h Handler) ProjectEdit(c echo.Context) error {
-	id := c.Param("project-id")
+	idStr := c.Param("project-id")
 
-	project, found, err := h.store.ProjectGet(id)
+	id64, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return errors.New("failed to get project from DB: " + err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid project ID")
 	}
-	if !found {
-		return echo.NewHTTPError(http.StatusNotFound, "project not found")
+
+	id := uint(id64)
+
+	project, err := h.store.GetProject(id)
+	if err != nil {
+		if bestore.NotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, "project not found")
+		}
+		return errors.New("failed to get project from DB: " + err.Error())
 	}
 
 	return c.Render(http.StatusOK, "project/edit", projectEditPageData{
@@ -52,22 +60,29 @@ func (h Handler) ProjectEdit(c echo.Context) error {
 }
 
 type projectUsersPageData struct {
-	Project  store.Project
-	Balances []store.UserBalance
+	Project  bestore.Project
+	Balances []bestore.UserBalance
 }
 
 func (h Handler) ProjectUsers(c echo.Context) error {
-	projectID := c.Param("project-id")
+	idStr := c.Param("project-id")
 
-	project, found, err := h.store.ProjectGet(projectID)
+	id64, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid project ID")
+	}
+
+	id := uint(id64)
+
+	project, err := h.store.GetProject(id)
+	if err != nil {
+		if bestore.NotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, "project not found")
+		}
 		return errors.New("failed to get project from DB: " + err.Error())
 	}
-	if !found {
-		return echo.NewHTTPError(http.StatusNotFound, "project not found")
-	}
 
-	balances, err := h.store.ProjectUsersBalances(projectID)
+	balances, err := h.store.ProjectUsersBalances(id)
 	if err != nil {
 		return errors.New("failed to get project users balances from DB: " +
 			err.Error())
@@ -86,9 +101,7 @@ func (h Handler) NewProject(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "blank name")
 	}
 
-	id := slug.Make(name)
-
-	err := h.store.ProjectAdd(id, name)
+	err := h.store.AddProject(name)
 	if err != nil {
 		return errors.New("failed to add project to DB: " + err.Error())
 	}
@@ -101,10 +114,14 @@ var (
 )
 
 func (h Handler) EditProject(c echo.Context) error {
-	id := c.Param("project-id")
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "blank project ID")
+	idStr := c.Param("project-id")
+
+	id64, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid project ID")
 	}
+
+	id := uint(id64)
 
 	action := c.FormValue("action")
 
@@ -118,15 +135,16 @@ func (h Handler) EditProject(c echo.Context) error {
 				"invalid project name")
 		}
 
-		err := h.store.ProjectSet(id, newName)
+		err := h.store.SetProjectName(id, newName)
 		if err != nil {
 			return errors.New("failed to set in DB: " + err.Error())
 		}
 
-		return c.Redirect(http.StatusFound, "/projects/"+id+"/edit")
+		return c.Redirect(http.StatusFound,
+			fmt.Sprintf("/projects/%d/edit", id))
 
 	case "remove":
-		err := h.store.ProjectRemove(id)
+		err := h.store.RemoveProject(id)
 		if err != nil {
 			return errors.New("failed to remove from DB: " + err.Error())
 		}

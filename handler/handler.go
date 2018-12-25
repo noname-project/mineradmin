@@ -3,16 +3,16 @@ package handler
 import (
 	"net/http"
 
-	"github.com/boomstarternetwork/mineradmin/store"
+	"github.com/boomstarternetwork/bestore"
 	"github.com/labstack/echo"
 )
 
 type Handler struct {
-	store     store.Store
+	store     bestore.Store
 	jwtSecret []byte
 }
 
-func NewHandler(s store.Store, jwtSecret string) Handler {
+func NewHandler(s bestore.Store, jwtSecret string) Handler {
 	return Handler{
 		store:     s,
 		jwtSecret: []byte(jwtSecret),

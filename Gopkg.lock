@@ -2,6 +2,22 @@
 
 
 [[projects]]
+  digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
+  version = "v0.3.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7e179f1b687f67fb220e925d5210c16290d8f31bef31a29fd24e0681fc541a89"
+  name = "github.com/boomstarternetwork/bestore"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "892abe834e34895e3a18fd72157871aaf13ee573"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -18,98 +34,34 @@
   version = "v3.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9a8c267811e3b6fae377040b8bf050fcee59fdb8cade14ad3f929d924e08093d"
-  name = "github.com/getlantern/context"
+  digest = "1:2ddfc1382a659966038282873c9e33e7694fa503130d445e97c4fdc3b8c5db66"
+  name = "github.com/jinzhu/gorm"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "624d99b1798d7c5375ea1d3ca4c5b04d58f7c775"
+  revision = "472c70caa40267cb89fd8facb07fe6454b578626"
+  version = "v1.9.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:56460acc7affba18fa344130886a6f841988d1368a051759d2e0c03ef6255f54"
-  name = "github.com/getlantern/errors"
+  digest = "1:802f75230c29108e787d40679f9bf5da1a5673eaf5c10eb89afd993e18972909"
+  name = "github.com/jinzhu/inflection"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "e24b7f4ff7c70be59bbefca6b7695d68cda8b399"
+  revision = "04140366298a54a039076d798123ffa108fff46c"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f12c7103ba4c446c6822f331ada3e5f0c3626be111a115e92700cd2724bca9ed"
-  name = "github.com/getlantern/hex"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "083fba3033ad473db3dd31c9bb368473d37581a7"
-
-[[projects]]
-  branch = "master"
-  digest = "1:916634881c70eb3c2201419786896254d601a786a9124e662a079d4649df160d"
-  name = "github.com/getlantern/hidden"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "d52a649ab33af200943bb599898dbdcfdbc94cb7"
-
-[[projects]]
-  branch = "master"
-  digest = "1:f84e2692edf40301ae0ce718695cde032f5c6964e4fad812749eb1eaefa95785"
-  name = "github.com/getlantern/ops"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "37353306c90844c8e0591956f56611f46299d202"
-
-[[projects]]
-  digest = "1:91358b3a314c1ddfd4d6445ca9c1fb846842c31c153e626730594b3c95f73f4a"
-  name = "github.com/go-stack/stack"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
-  version = "v1.8.0"
-
-[[projects]]
-  digest = "1:c593b6b68e9b9b40d4f259db06d697444ffec56db6c70a023c3b80c39d3ad9bc"
-  name = "github.com/go-xorm/builder"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "145c9968bfe732a56d7160439d25154c5aaa2f35"
-  version = "v0.3.1"
-
-[[projects]]
-  digest = "1:c910feae32bcc3cbf068c7263424d9f198da931c0cad909179621835e6f87cb8"
-  name = "github.com/go-xorm/core"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "c10e21e7e1cec20e09398f2dfae385e58c8df555"
-  version = "v0.6.0"
-
-[[projects]]
-  digest = "1:cf5374672de380bbe361d2b3ef6a904c55130f424a54c89db69c1ed34aa06298"
-  name = "github.com/go-xorm/xorm"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "d85bb4911c725a53b135fc12862748a41b6c07da"
-  version = "v0.7.0"
-
-[[projects]]
-  digest = "1:054eee1d0e46aac07290bb3b2d42f1e9fc302c4c430012ed5507e9f7eac89c12"
-  name = "github.com/gosimple/slug"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "91d42f4c3433698e88e87b17a3efbfe40b67c323"
-  version = "v1.2.0"
-
-[[projects]]
-  digest = "1:0f7251e66e237eff3aa62a70890f67a3364b4a77c3a496f18773d6cd4b50938c"
+  digest = "1:6a9a0e42dbadd13b1d4ac430c820159b9fa2e581c686f2d8d6d6d091f0b10428"
   name = "github.com/labstack/echo"
   packages = [
     ".",
     "middleware",
   ]
   pruneopts = "NUT"
-  revision = "1abaa3049251d17932e4313c2d6165073fd07fd8"
-  version = "v3.3.6"
+  revision = "c7eb8da9ec73e78c4f38413f3f835e0cd52c7d72"
+  version = "v3.3.8"
 
 [[projects]]
-  digest = "1:42ecba6280172b66005991519361e5c0505d89f9685c0d4311f9ec546610d453"
+  digest = "1:47ee373e16e657b31403855fbd88625fc8a9dc839f4b2a2a1b47747890bd322e"
   name = "github.com/labstack/gommon"
   packages = [
     "bytes",
@@ -118,8 +70,8 @@
     "random",
   ]
   pruneopts = "NUT"
-  revision = "2a618302b929cc20862dda3aa6f02f64dbe740dd"
-  version = "v0.2.7"
+  revision = "7fd9f68ece0bcb1a905fac8f1549f0083f71c51b"
+  version = "v0.2.8"
 
 [[projects]]
   digest = "1:4d5fa9f49e5bf3d55c16ff562af9e3231f9ac5ccf495927fd0555f4607c15475"
@@ -157,14 +109,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:16e2136a67ec44aa2d1d6b0fd65394b3c4a8b2a1b6730c77967f7b7b06b179b2"
-  name = "github.com/rainycape/unidecode"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
-
-[[projects]]
   digest = "1:1af58d182e3b1008d25d7ba65ff7c2631a246023d3b814f9ba8c7919aded59f3"
   name = "github.com/sethvargo/go-password"
   packages = ["password"]
@@ -200,14 +144,6 @@
   version = "v1.2.2"
 
 [[projects]]
-  digest = "1:5dba68a1600a235630e208cb7196b24e58fcbb77bb7a6bec08fcd23f081b0a58"
-  name = "github.com/urfave/cli"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
-  version = "v1.20.0"
-
-[[projects]]
   digest = "1:af354641f23332b1a8d5d361d11b5a9171589e412a67d499633706c611acc064"
   name = "github.com/valyala/bytebufferpool"
   packages = ["."]
@@ -225,7 +161,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4d2d4c25ade9a47aee073249abe73ac441e73d6748286bac404c0bfddc6cdd4a"
+  digest = "1:64cbf54de6183132e134a9c38a95e6c06c43f0031a3140cc6a86d441f4fbecbb"
   name = "golang.org/x/crypto"
   packages = [
     "acme",
@@ -234,35 +170,48 @@
     "blowfish",
   ]
   pruneopts = "NUT"
-  revision = "e3636079e1a4c1f337f212cc5cd2aca108f6c900"
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
-  digest = "1:79325523c76a32a00daae41a018570653948212a2b93838c83c571f6a68e48ef"
+  digest = "1:1d7f49852f5b3d448b8c5534c4a122e37e77b030088a66d21239ccf5640bc969"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "NUT"
-  revision = "e4b3c5e9061176387e7cea65e4dc5853801f3fb7"
+  revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
+
+[[projects]]
+  digest = "1:1beaa00290a7677eae3e3221b99208f94089aa893cc60dd5622f19c42d5eefb0"
+  name = "gopkg.in/urfave/cli.v1"
+  packages = [
+    ".",
+    "altsrc",
+  ]
+  pruneopts = "NUT"
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
+  digest = "1:18108594151654e9e696b27b181b953f9a90b16bf14d253dd1b397b025a1487f"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/boomstarternetwork/bestore",
     "github.com/dgrijalva/jwt-go",
-    "github.com/getlantern/errors",
-    "github.com/go-xorm/core",
-    "github.com/go-xorm/xorm",
-    "github.com/gosimple/slug",
     "github.com/labstack/echo",
     "github.com/labstack/echo/middleware",
     "github.com/labstack/gommon/log",
     "github.com/lib/pq",
-    "github.com/sethvargo/go-password/password",
-    "github.com/shopspring/decimal",
     "github.com/stretchr/testify/assert",
-    "github.com/stretchr/testify/mock",
-    "github.com/urfave/cli",
-    "golang.org/x/crypto/bcrypt",
+    "gopkg.in/urfave/cli.v1",
+    "gopkg.in/urfave/cli.v1/altsrc",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

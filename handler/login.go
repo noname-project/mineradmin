@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-
+	"github.com/boomstarternetwork/bestore"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 )
 
@@ -31,14 +31,13 @@ func (h Handler) Login(c echo.Context) error {
 	password := c.FormValue("password")
 	path := c.FormValue("path")
 
-	ok, err := h.store.AdminCheckPassword(login, password)
+	err := h.store.CheckAdminPassword(login, password)
 	if err != nil {
+		if bestore.InvalidLoginOrPassword(err) {
+			return echo.NewHTTPError(http.StatusBadRequest,
+				"invalid login or password")
+		}
 		return errors.New("failed to check password in DB: " + err.Error())
-	}
-
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid login or password")
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)

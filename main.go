@@ -7,33 +7,14 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/boomstarternetwork/mineradmin/dbstore"
+	"github.com/boomstarternetwork/bestore"
 	"github.com/boomstarternetwork/mineradmin/handler"
-	xormcore "github.com/go-xorm/core"
-	"github.com/go-xorm/xorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 	_ "github.com/lib/pq"
-	"github.com/urfave/cli"
-)
-
-const (
-	// connStrEnv is environment variable with postgres connection string like
-	// `"postgres://pqgotest:password@localhost/pqgotest?sslmode=verify-full"`
-	// or
-	// `user=pqgotest password=password dbname=pqgotest sslmode=verify-full`
-	connStrEnv = "MINERADMIN_POSTGRES_CONNECTION_STRING"
-
-	// bindAddrEnv is environment variable with bind address like:
-	// :80, 127.0.0.1:8080
-	bindAddrEnv = "MINERADMIN_BIND_ADDR"
-
-	// modeEnv is environment variable with web server run mode:
-	// production or development
-	modeEnv = "MINERADMIN_MODE"
-
-	jwtSecretEnv = "MINERADMIN_JWT_SECRET"
+	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1/altsrc"
 )
 
 var (
@@ -47,49 +28,62 @@ func main() {
 	app.Description = "Miningpool miners admin web server."
 	app.Author = "Vadim Chernov"
 	app.Email = "v.chernov@boomstarter.ru"
-	app.Version = "0.1"
+	app.Version = "0.2"
+
+	webServerFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  "config, c",
+			Usage: "config file",
+			Value: "",
+		},
+		altsrc.NewStringFlag(cli.StringFlag{
+			Name:  "postgres-cs",
+			Usage: "postgres connection string",
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
+			Name:  "bind-addr",
+			Usage: "web server bind address",
+			Value: ":80",
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
+			Name:  "jwt-secret",
+			Usage: "JWT secret used in salting",
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
+			Name:  "run-mode",
+			Usage: "run mode: production or development",
+			Value: "production",
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
+			Name:  "log-level",
+			Usage: "log level: debug, info, warn, error, off",
+			Value: "info",
+		}),
+	}
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "webserver",
-			Aliases: []string{"ws"},
-			Usage:   "run webserver",
-			Action:  webServer,
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "postgres-cs, p",
-					Usage:  "postgres connection string",
-					EnvVar: connStrEnv,
-				},
-				cli.StringFlag{
-					Name:   "bind-addr, b",
-					Usage:  "web server bind address",
-					EnvVar: bindAddrEnv,
-					Value:  ":80",
-				},
-				cli.StringFlag{
-					Name:   "mode, m",
-					Usage:  "run mode: production or development",
-					EnvVar: modeEnv,
-					Value:  "production",
-				},
-				cli.StringFlag{
-					Name:   "jwt-secret, j",
-					Usage:  "JWT secret used in salting",
-					EnvVar: jwtSecretEnv,
-				},
-			},
+			Name:   "web-server",
+			Usage:  "run web server",
+			Action: webServer,
+			Flags:  webServerFlags,
+			Before: altsrc.InitInputSourceWithContext(webServerFlags,
+				func(c *cli.Context) (altsrc.InputSourceContext, error) {
+					config := c.String("config")
+					if config != "" {
+						return altsrc.NewYamlSourceFromFlagFunc("config")(c)
+					}
+					return &altsrc.MapInputSource{}, nil
+				}),
 		},
 		{
-			Name:    "addadmin",
-			Aliases: []string{"aa"},
-			Usage:   "add admin to database",
-			Action:  addAdmin,
+			Name:   "add-admin",
+			Usage:  "add admin to database",
+			Action: addAdmin,
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:   "postgres-cs, p",
-					Usage:  "postgres connection string",
-					EnvVar: connStrEnv,
+					Name:  "postgres-cs, p",
+					Usage: "postgres connection string",
 				},
 				cli.StringFlag{
 					Name:  "login, l",
@@ -109,102 +103,26 @@ func main() {
 func webServer(c *cli.Context) error {
 	connStr := c.String("postgres-cs")
 	bindAddr := c.String("bind-addr")
-	runMode := c.String("mode")
 	jwtSecret := c.String("jwt-secret")
+	runMode := c.String("run-mode")
+	logLevel := c.String("log-level")
 
-	e := echo.New()
-
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
-		RedirectCode: http.StatusMovedPermanently,
-	}))
-	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-		TokenLookup:  "form:csrf-token",
-		ContextKey:   "csrf-token",
-		CookieSecure: true,
-	}))
-
-	xdb, err := xorm.NewEngine("postgres", connStr)
+	s, err := bestore.NewDBStore(connStr, runMode)
 	if err != nil {
-		return cli.NewExitError("failed to open gorm DB: "+err.Error(), 2)
-	}
-	defer xdb.Close()
-
-	xdb.SetMapper(xormcore.GonicMapper{})
-	xdb.Logger().SetLevel(xormcore.LOG_OFF)
-
-	switch runMode {
-	case "production":
-		e.Logger.SetLevel(log.ERROR)
-		e.Renderer, err = handler.NewProdTemplateRenderer("./templates")
-		if err != nil {
-			return cli.NewExitError(
-				"failed to create production template renderer: "+
-					err.Error(), 3)
-		}
-	case "development":
-		e.Logger.SetLevel(log.INFO)
-		e.Debug = true
-		e.Renderer = handler.NewDevTemplateRenderer("./templates")
-	default:
-		return cli.NewExitError("invalid run mode", 4)
+		return cli.NewExitError("failed to create new DB store: "+
+			err.Error(), 1)
 	}
 
-	s := dbstore.New(xdb)
-	h := handler.NewHandler(s, jwtSecret)
+	e, err := initWebServer(s, jwtSecret, runMode, logLevel)
+	if err != nil {
+		return cli.NewExitError("failed to init web server: "+
+			err.Error(), 2)
+	}
 
-	e.GET("/login", h.Login)
-	e.POST("/login", h.Login)
-
-	r := e.Group("")
-
-	r.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			err := next(c)
-			if err == jwtAuthError {
-				redirectPath := "/login"
-				path := c.Request().URL.Path + "?" + c.Request().URL.RawQuery
-				if path != "/?" && path != "?" {
-					redirectPath += "?path=" + url.QueryEscape(path)
-				}
-				c.Redirect(http.StatusFound, redirectPath)
-			}
-			return err
-		}
-	})
-
-	r.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		ErrorHandler: func(e error) error {
-			return jwtAuthError
-		},
-		SigningKey:    []byte(jwtSecret),
-		SigningMethod: middleware.AlgorithmHS256,
-		ContextKey:    "login",
-		TokenLookup:   "cookie:auth",
-	}))
-
-	r.GET("/", h.Index)
-
-	r.GET("/logout", h.Logout)
-
-	r.GET("/projects", h.Projects)
-	r.GET("/projects/:project-id/edit", h.ProjectEdit)
-	r.GET("/projects/:project-id/users", h.ProjectUsers)
-	r.POST("/projects", h.NewProject)
-	r.POST("/projects/:project-id", h.EditProject)
-
-	r.GET("/admins", h.Admins)
-	r.POST("/admins", h.NewAdmin)
-	r.POST("/admins/:admin-id", h.EditAdmin)
-
-	r.GET("/users", h.Users)
-	r.POST("/users", h.NewUser)
-	r.GET("/users/:user-id/addresses", h.UserAddresses)
-	r.POST("/users/:user-id/addresses", h.EditUserAddresses)
+	err = e.Start(bindAddr)
 
 	return cli.NewExitError("failed to start echo server: "+
-		e.Start(bindAddr).Error(), 5)
+		err.Error(), 3)
 }
 
 func addAdmin(c *cli.Context) error {
@@ -215,17 +133,13 @@ func addAdmin(c *cli.Context) error {
 		return errors.New("invalid login format")
 	}
 
-	xdb, err := xorm.NewEngine("postgres", connStr)
+	s, err := bestore.NewDBStore(connStr, "production")
 	if err != nil {
-		return cli.NewExitError("failed to open gorm DB: "+err.Error(), 2)
+		return cli.NewExitError("failed to create new DB store: "+
+			err.Error(), 5)
 	}
-	defer xdb.Close()
 
-	xdb.Logger().SetLevel(xormcore.LOG_OFF)
-
-	s := dbstore.New(xdb)
-
-	password, err := s.AdminAdd(login)
+	password, err := s.AddAdmin(login)
 	if err != nil {
 		return errors.New("failed to add admin to DB: " + err.Error())
 	}
@@ -233,4 +147,107 @@ func addAdmin(c *cli.Context) error {
 	fmt.Println("Password:", password)
 
 	return nil
+}
+
+func initWebServer(s bestore.Store, jwtSecret string,
+	runMode string, logLevel string) (*echo.Echo, error) {
+	e := echo.New()
+
+	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		RedirectCode: http.StatusMovedPermanently,
+	}))
+	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		TokenLookup:  "form:csrf-token",
+		ContextKey:   "csrf-token",
+		CookieSecure: true,
+	}))
+
+	var err error
+
+	switch runMode {
+	case "production":
+		e.Use(middleware.Recover())
+		e.Renderer, err = handler.NewProdTemplateRenderer("./templates")
+		if err != nil {
+			return nil, errors.New("failed to create production template " +
+				"renderer: " + err.Error())
+		}
+	case "development":
+		e.Use(middleware.Recover())
+		e.Debug = true
+		e.Renderer = handler.NewDevTemplateRenderer("./templates")
+	case "testing":
+	default:
+		return nil, errors.New("invalid run mode")
+	}
+
+	switch logLevel {
+	case "debug", "info", "warn", "error":
+		e.Use(middleware.Logger())
+	}
+
+	switch logLevel {
+	case "debug":
+		e.Logger.SetLevel(log.DEBUG)
+	case "info":
+		e.Logger.SetLevel(log.INFO)
+	case "warn":
+		e.Logger.SetLevel(log.WARN)
+	case "error":
+		e.Logger.SetLevel(log.ERROR)
+	case "off":
+	default:
+		return nil, errors.New("invalid log level")
+	}
+
+	h := handler.NewHandler(s, jwtSecret)
+
+	e.GET("/login", h.Login)
+	e.POST("/login", h.Login)
+
+	withJWT := middleware.JWTWithConfig(middleware.JWTConfig{
+		ErrorHandler: func(e error) error {
+			return jwtAuthError
+		},
+		SigningKey:    []byte(jwtSecret),
+		SigningMethod: middleware.AlgorithmHS256,
+		ContextKey:    "login",
+		TokenLookup:   "cookie:auth",
+	})
+
+	withAuth := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return withJWT(func(c echo.Context) error {
+			err := next(c)
+			if err == jwtAuthError {
+				redirectPath := "/login"
+				path := c.Request().URL.Path + "?" + c.Request().URL.RawQuery
+				if path != "/?" && path != "?" {
+					redirectPath += "?path=" + url.QueryEscape(path)
+				}
+				c.Redirect(http.StatusFound, redirectPath)
+			}
+			return err
+		})
+	}
+
+	e.GET("/", withAuth(h.Index))
+
+	e.GET("/logout", withAuth(h.Logout))
+
+	e.GET("/projects", withAuth(h.Projects))
+	e.GET("/projects/:project-id/edit", withAuth(h.ProjectEdit))
+	e.GET("/projects/:project-id/users", withAuth(h.ProjectUsers))
+	e.POST("/projects", withAuth(h.NewProject))
+	e.POST("/projects/:project-id", withAuth(h.EditProject))
+
+	e.GET("/admins", withAuth(h.Admins))
+	e.POST("/admins", withAuth(h.NewAdmin))
+	e.POST("/admins/:admin-id", withAuth(h.EditAdmin))
+
+	e.GET("/users", withAuth(h.Users))
+	e.POST("/users", withAuth(h.NewUser))
+	e.GET("/users/:user-id/addresses", withAuth(h.UserAddresses))
+	e.POST("/users/:user-id/addresses", withAuth(h.EditUserAddresses))
+
+	return e, nil
 }

@@ -42,25 +42,13 @@
   version = "1.2.2"
 
 [[constraint]]
-  name = "github.com/shopspring/decimal"
-  version = "1.1.0"
-
-[[constraint]]
-  name = "github.com/gosimple/slug"
-  version = "1.2.0"
-
-[[constraint]]
-  name = "github.com/sethvargo/go-password"
-  version = "0.1.2"
-
-[[constraint]]
   name = "github.com/dgrijalva/jwt-go"
   version = "3.2.0"
 
 [[constraint]]
-  name = "github.com/urfave/cli"
-  version = "1.20.0"
+  branch = "master"
+  name = "github.com/boomstarternetwork/bestore"
 
 [[constraint]]
-  name = "github.com/go-xorm/xorm"
-  version = "0.7.0"
+  name = "gopkg.in/urfave/cli.v1"
+  version = "1.20.0"

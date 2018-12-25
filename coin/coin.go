@@ -1,20 +1,10 @@
 package coin
 
-func List() []string {
-	return []string{
-		"BTC",
-		"BCH",
-		"DASH",
-		"ETH",
-		"LTC",
-	}
-}
+import "github.com/boomstarternetwork/bestore"
 
-func Valid(coin string) bool {
-	for _, c := range List() {
-		if c == coin {
-			return true
-		}
+func List() []bestore.Coin {
+	return []bestore.Coin{
+		bestore.BTC,
+		bestore.ETH,
 	}
-	return false
 }
